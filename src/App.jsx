@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import Search from './components/Search.jsx'
+import Spinner from './components/Spinner.jsx';
+import MovieCard from './components/MovieCard.jsx';
 
 const App = () => {
   const [searchTerm , setSearchTerm]= useState("");
   const [errorMsg , setErrorMsg] = useState("");
- 
-
+  const [movieList , setMovieList] = useState([]);
+  const [isloding , setIsLoding] = useState(false);
 
 
   const API_BASE_URL = 'https://api.themoviedb.org/3';
@@ -22,18 +24,26 @@ const App = () => {
   }
 
   const fetchMovies = async () =>{
+    setIsLoding(true);
+    setErrorMsg("");
     try {
       const endpoint =` ${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
       const response = await fetch(endpoint , API_OPTIONS);  //fetch prebuilt method to make http request
       if(!response.ok) throw new Error("falied to fetch movies");
       const movieData = await response.json();
-      // console.log(movieData);
+      console.log(movieData);
       if(movieData.Response === 'False'){
         setErrorMsg(movieData.Error || "falied to fetch movies");
+        setMovieList([]);
+        return ; 
       }
+      setMovieList(movieData.results);
+
     } catch (error) {
       console.log(`Error fetching movies : ${error}`);
       setErrorMsg("Error in fetching Movies");
+    } finally{
+      setIsLoding(false);
     }
   }
 
@@ -52,8 +62,24 @@ const App = () => {
         </header>
 
         <section className='all-movies'>
-          <h2>All Movies</h2>
-          {errorMsg && <p className='text-red-600'>{errorMsg}</p>}
+          <h2 className='mt-[35px]'>All Movies</h2>
+          {
+            isloding ? (
+           <Spinner/>
+            ) : errorMsg ? (
+              <p className='text-red-600 text-2xl'>{errorMsg}</p>
+            ) : (
+              <ul>
+                {
+                  movieList.map((movie)=>(
+                    <MovieCard key={movie.id} movie = {movie}/>
+                  ))
+                }
+              </ul>
+            )
+            
+          }
+         
         </section>
        
       </div>
