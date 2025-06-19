@@ -12,7 +12,6 @@ const Search = ({searchTerm , setSearchTerm}) => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}/>
         {searchTerm?<MdCancel className='text-2xl text-white m-2' onClick={()=>{setSearchTerm('')}}/> : null}
-        
     </div>
   )
 }
