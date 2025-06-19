@@ -3,13 +3,17 @@ import './App.css'
 import Search from './components/Search.jsx'
 import Spinner from './components/Spinner.jsx';
 import MovieCard from './components/MovieCard.jsx';
+import { useDebounce } from './hook/useDebounce.js';
 
 const App = () => {
   const [searchTerm , setSearchTerm]= useState("");
   const [errorMsg , setErrorMsg] = useState("");
   const [movieList , setMovieList] = useState([]);
   const [isloding , setIsLoding] = useState(false);
-
+  
+  const debouncedSearchTerm = useDebounce(searchTerm , 500);
+  //debounce the search term to prevent making too many api requests
+  //by waiting for the user to stop typing for 500ms
 
   const API_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -23,11 +27,14 @@ const App = () => {
     }
   }
 
-  const fetchMovies = async () =>{
+  const fetchMovies = async (query = "") =>{
     setIsLoding(true);
     setErrorMsg("");
     try {
-      const endpoint =` ${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = query ? 
+      `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
+      :`${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+
       const response = await fetch(endpoint , API_OPTIONS);  //fetch prebuilt method to make http request
       if(!response.ok) throw new Error("falied to fetch movies");
       const movieData = await response.json();
@@ -48,8 +55,8 @@ const App = () => {
   }
 
   useEffect(() => {
-   fetchMovies();
-  }, [])
+   fetchMovies(debouncedSearchTerm);
+  }, [debouncedSearchTerm])
   
  return (
     <>
