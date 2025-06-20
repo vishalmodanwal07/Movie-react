@@ -4,7 +4,7 @@ import Search from './components/Search.jsx'
 import Spinner from './components/Spinner.jsx';
 import MovieCard from './components/MovieCard.jsx';
 import { useDebounce } from './Custom-hook/useDebounce.js';
-import { getTrendingMovies, updateSearchCount } from './appwrite.jsx';
+import { getTrendingMovies, updateSearchCount } from './appwrite/appwrite.js';
 
 const App = () => {
   const [searchTerm , setSearchTerm]= useState("");
