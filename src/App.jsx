@@ -3,7 +3,8 @@ import './App.css'
 import Search from './components/Search.jsx'
 import Spinner from './components/Spinner.jsx';
 import MovieCard from './components/MovieCard.jsx';
-import { useDebounce } from './hook/useDebounce.js';
+import { useDebounce } from './Custom-hook/useDebounce.js';
+import { updateSearchCount } from './appwrite.jsx';
 
 const App = () => {
   const [searchTerm , setSearchTerm]= useState("");
@@ -11,7 +12,7 @@ const App = () => {
   const [movieList , setMovieList] = useState([]);
   const [isloding , setIsLoding] = useState(false);
   
-  const debouncedSearchTerm = useDebounce(searchTerm , 500);
+  const debouncedSearchTerm = useDebounce(searchTerm , 2000);
   //debounce the search term to prevent making too many api requests
   //by waiting for the user to stop typing for 500ms
 
@@ -27,7 +28,7 @@ const App = () => {
     }
   }
 
-  const fetchMovies = async (query = "") =>{
+  const fetchMovies = async (query = '') =>{
     setIsLoding(true);
     setErrorMsg("");
     try {
@@ -45,6 +46,9 @@ const App = () => {
         return ; 
       }
       setMovieList(movieData.results);
+      if(query && movieData.results.length >0){
+         updateSearchCount(query , movieData.results[0] );
+      }
 
     } catch (error) {
       console.log(`Error fetching movies : ${error}`);
