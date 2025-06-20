@@ -4,11 +4,12 @@ import Search from './components/Search.jsx'
 import Spinner from './components/Spinner.jsx';
 import MovieCard from './components/MovieCard.jsx';
 import { useDebounce } from './Custom-hook/useDebounce.js';
-import { updateSearchCount } from './appwrite.jsx';
+import { getTrendingMovies, updateSearchCount } from './appwrite.jsx';
 
 const App = () => {
   const [searchTerm , setSearchTerm]= useState("");
   const [errorMsg , setErrorMsg] = useState("");
+  const [trendingMovies , setTrendingMovies] = useState([]);
   const [movieList , setMovieList] = useState([]);
   const [isloding , setIsLoding] = useState(false);
   
@@ -58,9 +59,22 @@ const App = () => {
     }
   }
 
+  const loadTrendingMovies = async () =>{
+    try {
+      const trendingMovies = await getTrendingMovies();
+      setTrendingMovies(trendingMovies);
+    } catch (error) {
+      console.log(`failed to fetch trending movies : ${error}` )
+    }
+  }
+
   useEffect(() => {
    fetchMovies(debouncedSearchTerm);
-  }, [debouncedSearchTerm])
+  }, [debouncedSearchTerm]);
+
+  useEffect(()=>{
+    loadTrendingMovies();
+  } , [])
   
  return (
     <>
@@ -72,8 +86,26 @@ const App = () => {
            <Search searchTerm={searchTerm}  setSearchTerm= {setSearchTerm}/>
         </header>
 
+        {
+          trendingMovies.length >0 && (
+            <section className='trending'>
+              <h2>Trending Movies</h2>
+              <ul>
+                {
+                  trendingMovies.map((tmovie , index)=>(
+                    <li key={tmovie.$id}>
+                        <p>{ index +1 }</p>
+                        <img src={tmovie.poster_url} alt={tmovie.title}/>
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+          )
+        }
+
         <section className='all-movies'>
-          <h2 className='mt-[35px]'>All Movies</h2>
+          <h2>All Movies</h2>
           {
             isloding ? (
            <Spinner/>
